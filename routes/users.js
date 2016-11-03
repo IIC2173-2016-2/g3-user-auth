@@ -122,10 +122,11 @@ passport.deserializeUser(function(id, done) {
 });
 
 router.post('/login',
-  passport.authenticate('local', {successRedirect:dashboard, failureRedirect:'./login',failureFlash: true}),
-  function(req, res) {
-  	assign_token(req.user)
-    res.redirect('./');
+  passport.authenticate('local', {successRedirect:dashboard, failureRedirect:'./login',failureFlash: true}, 
+  	function(req, res) {
+  		assign_token(req.user);}), 
+  		function(req, res) {
+    		res.redirect('./');
   });
 
 router.get('/logout', function(req, res){
