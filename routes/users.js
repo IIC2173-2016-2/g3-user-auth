@@ -153,16 +153,18 @@ function assign_token(user){
 		client.sadd(["tokens", token], function(err, response){
 
 		});
-		client.set(user.id, token);
+		client.set(token, user.id);
 	});
 }
 
 function authenticate_token(req, res){
-	client.sismember("tokens", req.get("token"), function(err, reply){
+	var token = req.get("token");
+	client.sismember("tokens", token, function(err, reply){
 		if(reply==1){
+			var user_id = client.get(token)
 			body = {
-				user_id: user.id,
-				username: user.username
+				user_id: user_id,
+				username: getUserById(user_id).username
 			}
 			res.statusCode = 200;
 			res.setHeader('Content-Type', 'application/json');
