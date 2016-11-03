@@ -8,6 +8,9 @@ const randtoken = require('rand-token');
 const moment = require('moment');
 
 const client = redis.createClient();
+client.select(0, (err, res) => {
+  if (err) throw err;
+});
 const User = require('../models/user');
 
 const dashboard = 'http://localhost:3000/'
@@ -124,8 +127,8 @@ passport.deserializeUser(function(id, done) {
 router.post('/login',
   passport.authenticate('local'),
   function(req, res) {
-  	assign_token(req.user)
-    res.redirect('./');
+  	const token = assign_token(req.user);
+    res.redirect('./chat/chat_room/2/' + token);
   });
 
 router.get('/logout', function(req, res){
@@ -156,9 +159,10 @@ function assign_token(user){
 		client.sadd(["tokens", token], function(err, response){
 
 		});
-		client.set(token, user.id);
-		client.set(user.id, token);
+		client.set([token, user.id]);
+		client.set([user.id, token]);
 	});
+  return token;
 }
 
 function authenticate_token(req, res){
