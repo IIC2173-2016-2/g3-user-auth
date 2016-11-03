@@ -142,10 +142,13 @@ function assign_token(user){
 	var token = randtoken.generate(32);	
 	client.exists(user.id, function(err, reply){
 		if(reply==1){
+			console.log(client.get(user.id));
 			client.del(user.id);
 			var to_remove = client.zscan("tokens_ttl", 0, "MATCH", `${user.id},${user.username}*`)[1][0];
+			var token = to_remove.replace(`${user.id},${user.username}`, '')
 			client.zrem(to_remove);
-			client.srem(to_remove.replace(`${user.id},${user.username}`, ''));
+			client.srem(token);
+			client.del(token);
 		}
 		client.zadd(["tokens_ttl", moment(Date.now()).utc().add(2, 'hours').unix(), `${user.id},${user.username},${token}`], function(err, response){
 
@@ -154,6 +157,7 @@ function assign_token(user){
 
 		});
 		client.set(token, user.id);
+		client.set(user.id, token);
 	});
 }
 
