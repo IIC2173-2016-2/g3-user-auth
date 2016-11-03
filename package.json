@@ -24,7 +24,8 @@
     "passport-http": "*",
     "passport-local": "*",
     "rand-token": "*",
-    "redis": "*"
+    "redis": "*",
+    "moment": "*"
   },
   "repository": {
   "type": "git",

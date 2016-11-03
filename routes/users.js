@@ -4,7 +4,8 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const http = require('http');
 const redis = require('redis');
-const randtoken = require('rand-token')
+const randtoken = require('rand-token');
+const moment = require('moment');
 
 const client = redis.createClient();
 const User = require('../models/user');
@@ -142,7 +143,7 @@ function assign_token(user){
 	client.exists(user.id, function(err, reply){
 		if(reply==1){
 			client.del(user.id);
-			var to_remove = client.zscan("tokens_ttl", 0, "MATCH", `${user.id},${user.username}*`)[0][0];
+			var to_remove = client.zscan("tokens_ttl", 0, "MATCH", `${user.id},${user.username}*`)[1][0];
 			client.zrem(to_remove);
 			client.srem(to_remove.replace(`${user.id},${user.username}`, ''));
 		}
