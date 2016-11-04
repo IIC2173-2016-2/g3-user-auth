@@ -17,9 +17,8 @@ const dashboard = 'assw9.ing.puc.cl';
 
 function ensureAuthenticated(req, res, next){
   if(req.isAuthenticated()){
-    client.get(req.user.id, function(err, response){
-    res.setHeader('x-access-token', response);  
-    res.redirect(dashboard);
+    client.get(req.user.id, function(err, response){ 
+      res.redirect(dashboard+`?token=${response}`);
     });
   } else {
     return next();
