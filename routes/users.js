@@ -128,7 +128,8 @@ router.post('/login',
   passport.authenticate('local'),
   function(req, res) {
     const token = assign_token(req.user);
-    res.redirect('http://localhost:3000/chat/chat_room/2/' + token);
+    res.setHeader('x-access-token', token);
+    res.redirect('assw9.ing.puc.cl');
   });
 
 router.get('/logout', function(req, res){
@@ -170,7 +171,7 @@ function assign_token(user){
 }
 
 function authenticate_token(req, res){
-  var token = req.get("token");
+  var token = req.get("x-access-token");
   client.sismember(["tokens", token], function(err, reply){
     if(reply==1){
       var user_id;
