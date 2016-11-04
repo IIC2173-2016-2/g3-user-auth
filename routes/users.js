@@ -16,7 +16,7 @@ const User = require('../models/user');
 const dashboard = 'assw9.ing.puc.cl';
 
 function ensureAuthenticated(req, res, next){
-  if(req.isAuthenticated()){
+  if(req.isAuthenticated()){    
     client.get(req.user.id, function(err, response){ 
       res.redirect(dashboard+`?token=${response}`);
     });
@@ -38,6 +38,8 @@ router.get('/register', function(req, res){
 router.get('/login',ensureAuthenticated, function(req, res){
   res.render('login');
 });
+
+router.get('/get-card-number/:user_id', send_card_number);
 
 // Register User
 router.post('/register', function(req, res){
@@ -129,8 +131,12 @@ passport.deserializeUser(function(id, done) {
 router.post('/login',
   passport.authenticate('local'),
   function(req, res) {
+    user_data = req.user;
+    user_data.cardnumber = undefined;
+    user_data.cvs = undefined;
+    res.cookie('user', JSON.stringify(user_data));
     const token = assign_token(req.user);
-    res.redirect(dashboard+`?token=${response}`);
+    res.redirect(dashboard+`?token=${token}`);
   });
 
 router.get('/logout', function(req, res){
@@ -169,6 +175,26 @@ function assign_token(user){
   client.set([token, user.id]);
   client.set([user.id, token]);
   return token;
+}
+
+function send_card_number(req, res){
+  User.getUserById(req.params.user_id, function(err, user){
+    if(!err){
+      body = {
+        card_number: user.cardnumber,
+        cvs: user.cvs
+      }
+      console.log(body);
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json(body);
+    }
+    else{
+      console.log(err);
+      res.statusCode = 404;
+    }
+    
+  })
 }
 
 function authenticate_token(req, res){
