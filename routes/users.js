@@ -13,11 +13,14 @@ client.select(0, (err, res) => {
 });
 const User = require('../models/user');
 
-const dashboard = 'http://localhost:3000/'
+const dashboard = 'assw9.ing.puc.cl';
 
 function ensureAuthenticated(req, res, next){
   if(req.isAuthenticated()){
+    client.get(req.user.id, function(err, response){
+    res.setHeader('x-access-token', response);  
     res.redirect(dashboard);
+    });
   } else {
     return next();
   }
@@ -129,7 +132,7 @@ router.post('/login',
   function(req, res) {
     const token = assign_token(req.user);
     res.setHeader('x-access-token', token);
-    res.redirect('assw9.ing.puc.cl');
+    res.redirect(dashboard);
   });
 
 router.get('/logout', function(req, res){
