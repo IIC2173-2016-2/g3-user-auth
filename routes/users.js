@@ -130,8 +130,7 @@ router.post('/login',
   passport.authenticate('local'),
   function(req, res) {
     const token = assign_token(req.user);
-    res.setHeader('x-access-token', token);
-    res.redirect(dashboard);
+    res.redirect(dashboard+`?token=${response}`);
   });
 
 router.get('/logout', function(req, res){
