@@ -3,23 +3,15 @@ const router = express.Router();
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const http = require('http');
-const redis = require('redis');
-const randtoken = require('rand-token');
-const moment = require('moment');
+const jwt = require('jsonwebtoken');
 
-const client = redis.createClient();
-client.select(0, (err, res) => {
-  if (err) throw err;
-});
 const User = require('../models/user');
 
-const dashboard = 'assw9.ing.puc.cl';
+const dashboard = 'https://assw9.ing.puc.cl';
 
 function ensureAuthenticated(req, res, next){
-  if(req.isAuthenticated()){    
-    client.get(req.user.id, function(err, response){ 
-      res.redirect(dashboard+`?token=${response}`);
-    });
+  if(req.isAuthenticated()){
+    res.redirect(dashboard);
   } else {
     return next();
   }
@@ -38,8 +30,6 @@ router.get('/register', function(req, res){
 router.get('/login',ensureAuthenticated, function(req, res){
   res.render('login');
 });
-
-router.get('/get-card-number/:user_id', send_card_number);
 
 // Register User
 router.post('/register', function(req, res){
@@ -134,9 +124,8 @@ router.post('/login',
     user_data = req.user;
     user_data.cardnumber = undefined;
     user_data.cvs = undefined;
-    res.cookie('user', JSON.stringify(user_data));
-    const token = assign_token(req.user);
-    res.redirect(dashboard+`?token=${token}`);
+    res.cookie('access-token', jwt.sign(user_data, process.env.JWT_SECRET, "1 day"));
+    res.redirect(dashboard);
   });
 
 router.get('/logout', function(req, res){
@@ -149,52 +138,8 @@ router.get('/logout', function(req, res){
 
 router.get('/auth', authenticate_token);
 
-function assign_token(user){
-  var token = randtoken.generate(32); 
-  client.exists(user.id, function(err, reply){
-    if(reply==1){
-      var to_remove;
-      client.del(user.id);
-      client.zscan(["tokens_ttl", 0, "MATCH", `${user.id},${user.username}*`], function(err, response){
-        if(!err){
-          to_remove = response[1][0];          
-          var token = to_remove.replace(`${user.id},${user.username}`, '')
-          client.zrem(to_remove, function(err, response){});
-          client.srem(token, function(err, response){});
-          client.del(token);
-        }
-      });
-    }   
-  });
-  client.zadd(["tokens_ttl", moment(Date.now()).utc().add(2, 'hours').unix(), `${user.id},${user.username},${token}`], function(err, response){
-    
-  });
-  client.sadd(["tokens", token], function(err, response){
-
-  });
-  client.set([token, user.id]);
-  client.set([user.id, token]);
-  return token;
-}
-
-function send_card_number(req, res){
-  User.getUserById(req.params.user_id, function(err, user){
-    if(!err){
-      body = {
-        card_number: user.cardnumber,
-        cvs: user.cvs
-      }
-      console.log(body);
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'application/json');
-      res.json(body);
-    }
-    else{
-      console.log(err);
-      res.statusCode = 404;
-    }
-    
-  })
+function assign_token(res, user_data){
+  
 }
 
 function authenticate_token(req, res){
