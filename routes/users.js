@@ -33,6 +33,7 @@ router.get('/login',ensureAuthenticated, function(req, res){
 });
 
 // Register User
+cassandraUser = require('../controller/cassandra-add')
 router.post('/register', function(req, res){
   var name = req.body.name;
   var email = req.body.email;
@@ -81,6 +82,7 @@ router.post('/register', function(req, res){
 
     User.createUser(newUser, function(err, user){
       if(err) throw err;
+      //cassandraUser.addUser(user);
       console.log(user);
     });
 
