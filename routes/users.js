@@ -7,10 +7,11 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
 
-const dashboard = 'https://assw9.ing.puc.cl';
+const dashboard = '/';
 
 function ensureAuthenticated(req, res, next){
   if(req.isAuthenticated()){
+    //let backURL = req.headers['referer']
     res.redirect(dashboard);
   } else {
     return next();
@@ -122,10 +123,11 @@ router.post('/login',
   passport.authenticate('local'),
   function(req, res) {
     user_data = req.user;
+    user_data.password = undefined;
     user_data.cardnumber = undefined;
     user_data.cvs = undefined;
     res.cookie('access-token', jwt.sign(user_data, process.env.JWT_SECRET, { expiresIn: "1 day"}));
-    res.redirect(dashboard);
+    res.redirect("./");
   });
 
 router.get('/logout', function(req, res){
@@ -139,7 +141,7 @@ router.get('/logout', function(req, res){
 router.get('/auth', authenticate_token);
 
 function assign_token(res, user_data){
-  
+
 }
 
 function authenticate_token(req, res){
@@ -165,10 +167,10 @@ function authenticate_token(req, res){
           else{
             console.log(err);
           }
-        }); 
+        });
       });
     }
-    else{      
+    else{
       res.statusCode = 401;
     }
   });
