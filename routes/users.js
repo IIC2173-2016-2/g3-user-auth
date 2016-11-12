@@ -124,7 +124,7 @@ router.post('/login',
     user_data = req.user;
     user_data.cardnumber = undefined;
     user_data.cvs = undefined;
-    res.cookie('access-token', jwt.sign(user_data, process.env.JWT_SECRET, "1 day"));
+    res.cookie('access-token', jwt.sign(user_data, process.env.JWT_SECRET, { expiresIn: "1 day"}));
     res.redirect(dashboard);
   });
 
