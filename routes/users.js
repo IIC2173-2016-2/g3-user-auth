@@ -35,7 +35,8 @@ router.get('/login',ensureAuthenticated, function(req, res){
 // Register User
 cassandraUser = require('../controller/cassandra-add')
 router.post('/register', function(req, res){
-  var name = req.body.name;
+  var firstname = req.body.firstname;
+  var lastname = req.body.lastname;
   var email = req.body.email;
   var username = req.body.username;
   var password = req.body.password;
@@ -48,7 +49,8 @@ router.post('/register', function(req, res){
   var accounttype = req.body.accounttype;
 
   // Validation
-  req.checkBody('name', 'Name is required').notEmpty();
+  req.checkBody('firstname', 'First name is required').notEmpty();
+  req.checkBody('lastname', 'Last name is required').notEmpty();
   req.checkBody('email', 'Email is required').notEmpty();
   req.checkBody('email', 'Email is not valid').isEmail();
   req.checkBody('username', 'Username is required').notEmpty();
@@ -68,7 +70,8 @@ router.post('/register', function(req, res){
     });
   } else {
     var newUser = new User({
-      name: name,
+      firstname: firstname,
+      lastname: lastname,
       email:email,
       address: address,
       bloodtype: bloodtype,
