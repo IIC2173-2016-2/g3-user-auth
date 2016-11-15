@@ -131,11 +131,12 @@ router.post('/login',
     user_data.password = undefined;
     user_data.cardnumber = undefined;
     user_data.cvs = undefined;
-    res.cookie('access-token', jwt.sign(user_data, process.env.JWT_SECRET, { expiresIn: "1 day"}));
+    res.cookie('access-token', jwt.sign(user_data, process.env.JWT_SECRET, { expiresIn: "1 day"}), { maxAge: 86400000 });
     res.redirect("./");
   });
 
 router.get('/logout', function(req, res){
+  res.clearCookie('access-token');
   req.logout();
 
   req.flash('success_msg', 'You are logged out');
