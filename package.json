@@ -25,7 +25,9 @@
     "mongoose": "*",
     "passport": "*",
     "passport-http": "*",
-    "passport-local": "*"
+    "passport-local": "*",
+    "redis": "*",
+    "moment": "*"
   },
   "repository": {
     "type": "git",

@@ -15,6 +15,7 @@ mongoose.connect('mongodb://localhost/LoginEduardoChat');
 var db = mongoose.connection;
 
 var users = require('./routes/users');
+var userChat = require('./routes/users_chats');
 
 // Init App
 var app = express();
@@ -75,6 +76,7 @@ app.use(function (req, res, next) {
 });
 
 app.use('/users', users);
+app.use('/', userChat);
 
 // Set Port
 app.set('port', (process.env.PORT || 3000));

@@ -144,42 +144,4 @@ router.get('/logout', function(req, res){
   res.redirect('./login');
 });
 
-router.get('/auth', authenticate_token);
-
-function assign_token(res, user_data){
-
-}
-
-function authenticate_token(req, res){
-  var token = req.get("x-access-token");
-  client.sismember(["tokens", token], function(err, reply){
-    if(reply==1){
-      var user_id;
-      var username;
-      client.get(token, function(err, response){
-        user_id = response;
-        User.getUserById(user_id, function(err, user){
-          if(!err){
-            username = user.username;
-            body = {
-              user_id: user_id,
-              username: username
-            }
-            console.log(body);
-            res.statusCode = 200;
-            res.setHeader('Content-Type', 'application/json');
-            res.json(body);
-          }
-          else{
-            console.log(err);
-          }
-        });
-      });
-    }
-    else{
-      res.statusCode = 401;
-    }
-  });
-}
-
 module.exports = router;
