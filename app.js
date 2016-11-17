@@ -10,6 +10,7 @@ var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
 var mongo = require('mongodb');
 var mongoose = require('mongoose');
+mongoose.Promise = global.Promise; // Use native promises
 
 mongoose.connect('mongodb://localhost/LoginEduardoChat');
 var db = mongoose.connection;

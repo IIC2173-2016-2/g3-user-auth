@@ -11,19 +11,17 @@ function connect(callback) {
         var UserModel = models.loadSchema('users', {
             fields:{
                 users_id    : "text",
+                users_username  : "text",
                 users_arquicoins : "int",
                 users_updated_at     : "timestamp",
                 users_account_type: "text",
-                users_credit_number: "int",
+                users_credit_number: "text",
                 users_csv_number: "int"
             },
-            key:["users_id"]
+            key:["users_id"],
+            indexes: ["users_username"]
         }, function(err){
-            //the table in cassandra is now created
-            //the models.instance.Person or UserModel can now be used to do operations
-            // console.log(models.instance.Users);
-            // console.log(models.instance.Users === UserModel);
-            callback(UserModel);
+            callback(UserModel, models);
         });
     });
 }
