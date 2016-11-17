@@ -83,6 +83,7 @@ function deregisterChat(req, res)
 
 function checkAPIKey(req, res, next)
 {
+  console.log('got' + req.get('USERS-CHAT-API-KEY') + 'have' + process.env.USERS_CHAT_API_KEY)
   if (req.get('USERS-CHAT-API-KEY') == process.env.USERS_CHAT_API_KEY)
   {
     next();
