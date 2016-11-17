@@ -85,7 +85,9 @@ router.post('/register', function(req, res){
 
     User.createUser(newUser, function(err, user){
       if(err) throw err;
-      //cassandraUser.addUser(user);
+      cassandraUser.addUser(user, function(casErr, user){
+        if(casErr) throw casErr;
+      });
       console.log(user);
     });
 

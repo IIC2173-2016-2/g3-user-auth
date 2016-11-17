@@ -1,18 +1,22 @@
 var User = require('../models/users');
 
-function addUser(username, callback) {
+function addUser(user, callback) {
+
+    const hash = {
+        users_id: user._id,
+        users_arquicoins: 0,
+        users_updated_at: Date.now(),
+        users_username: user.username
+    };
 
     User.connect(function(Users) {
-        // error, amount
-        const Long = require('cassandra-driver').types.Long;
 
-        Users.findOne({users_id: username}, function(err, user){
-            if(err) {
-                callback(err, {'amount': 0 });
-            } else if(user) {
-                callback(null, {'amount': user.users_arquicoins });
+        var newUser = new Users(hash);
+        newUser.save(function (saveErr) {
+            if (saveErr) {
+                callback(saveErr, null);
             } else {
-              callback(null, {'amount': 0 });
+                callback(null, newUser)
             }
         });
     });
