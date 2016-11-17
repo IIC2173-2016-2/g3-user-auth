@@ -9,13 +9,16 @@ var UserChatSchema = mongoose.Schema({
   chat_id: {
     type: String,
     match: [/^[a-f\d]{24}$/, "Invalid id"]
+  },
+  chat_name: {
+    type: String
   }
 });
 
 var UserChat = module.exports = mongoose.model('UserChat', UserChatSchema);
 
-module.exports.register = function(user_id, chat_id, callback){
-  UserChat.create({user_id: user_id, chat_id: chat_id}, callback);
+module.exports.register = function(user_id, chat_id, chat_name, callback){
+  UserChat.create({user_id: user_id, chat_id: chat_id, chat_name: chat_name}, callback);
 }
 
 module.exports.deregister = function(user_id, chat_id, callback){
