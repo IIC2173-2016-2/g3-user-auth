@@ -11,13 +11,13 @@ client.select(0, (err, res) => {
 const User = require('../models/user');
 const UserChat = require('../models/user_chat');
 
-router.patch('/users-chats/register', checkAPIKey, registerChat);
-router.patch('/users-chats/deregister', checkAPIKey, deregisterChat);
+router.get('/users-chats/register', checkAPIKey, registerChat);
+router.get('/users-chats/deregister', checkAPIKey, deregisterChat);
 router.get('/users-chats/list', checkAPIKey, getChats);
 
 function registerChat(req, res)
 {
-  UserChat.register(req.get('user_id'), req.get('chat_id'), function(err){
+  UserChat.register(req.get('USER-ID'), req.get('CHAT-ID'), req.get('NAME'), function(err){
     if(err)
     {
       console.log(err);
@@ -26,7 +26,7 @@ function registerChat(req, res)
     }
     else
     {
-      client.zadd(["users_chats_ttl", moment(Date.now()).utc().add(24, 'hours').unix(), `${req.get('user_id')},${req.get('chat_id')}`], function(err, response){
+      client.zadd(["users_chats_ttl", moment(Date.now()).utc().add(24, 'hours').unix(), `${req.get('USER-ID')},${req.get('CHAT-ID')}`], function(err, response){
         if(err)
         {
           console.log(err);
@@ -39,7 +39,7 @@ function registerChat(req, res)
 
 function getChats(req, res)
 {
-  UserChat.listUserChats(req.get('user_id'), function(err, userChats){
+  UserChat.listUserChats(req.get('USER-ID'), function(err, userChats){
     if(err)
     {
       console.log(err);
@@ -55,7 +55,7 @@ function getChats(req, res)
 
 function deregisterChat(req, res)
 {
-  UserChat.deregister(req.get('user_id'), req.get('chat_id'), function(err){
+  UserChat.deregister(req.get('USER-ID'), req.get('CHAT-ID'), function(err){
     if(err)
     {
       console.log(err);
@@ -64,7 +64,7 @@ function deregisterChat(req, res)
     }
     else
     {
-      client.zscan(["users_chats_ttl", 0, "MATCH", `*,${req.get('chat_id')}`], function(err, response){
+      client.zscan(["users_chats_ttl", 0, "MATCH", `*,${req.get('CHAT-ID')}`], function(err, response){
         if(!err){
           to_remove = response[1][0];
           client.zrem("users_chats_ttl", to_remove, function(err, response)
@@ -83,7 +83,7 @@ function deregisterChat(req, res)
 
 function checkAPIKey(req, res, next)
 {
-  if (req.get('USERS_CHAT_API_KEY') == process.env.USERS_CHAT_API_KEY)
+  if (req.get('USERS-CHAT-API-KEY') == process.env.USERS_CHAT_API_KEY)
   {
     next();
   } 
