@@ -3,10 +3,10 @@ var User = require('../models/users');
 function addUser(user, callback) {
 
     const hash = {
-        users_id: user._id,
+        users_id: user._id.toString(),
         users_arquicoins: 0,
         users_updated_at: Date.now(),
-        users_username: user.username
+        users_username: user._doc.username
     };
 
     User.connect(function(Users) {
