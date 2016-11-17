@@ -17,23 +17,34 @@ router.get('/users-chats/list', checkAPIKey, getChats);
 
 function registerChat(req, res)
 {
-  UserChat.register(req.get('USER-ID'), req.get('CHAT-ID'), req.get('NAME'), function(err){
-    if(err)
-    {
-      console.log(err);
-      res.status(500);
-      res.send('Unable to register chat');
+  UserChat.findOne({ user_id: req.get('USER-ID'), chat_id: req.get('CHAT-ID') }, function(err, docs){
+    
+    if(docs)
+    {      
+      res.send('Chat already registered');
     }
     else
     {
-      client.zadd(["users_chats_ttl", moment(Date.now()).utc().add(24, 'hours').unix(), `${req.get('USER-ID')},${req.get('CHAT-ID')}`], function(err, response){
+      UserChat.register(req.get('USER-ID'), req.get('CHAT-ID'), req.get('NAME'), function(err){
         if(err)
         {
           console.log(err);
+          res.status(500);
+          res.send('Unable to register chat');
         }
-      });
-      res.send('Chat registered');
+        else
+        {
+          client.zadd(["users_chats_ttl", moment(Date.now()).utc().add(24, 'hours').unix(), `${req.get('USER-ID')},${req.get('CHAT-ID')}`], function(err, response){
+            if(err)
+            {
+              console.log(err);
+            }
+          });
+          res.send('Chat registered');
+        }
+      }); 
     }
+    
   });
 }
 
@@ -55,35 +66,44 @@ function getChats(req, res)
 
 function deregisterChat(req, res)
 {
-  UserChat.deregister(req.get('USER-ID'), req.get('CHAT-ID'), function(err){
-    if(err)
+  UserChat.findOne({ user_id: req.get('USER-ID'), chat_id: req.get('CHAT-ID') }, function(err, docs){
+    if(docs)
     {
-      console.log(err);
-      res.status(500);
-      res.send('Unable to deregister chat');
+      UserChat.deregister(req.get('USER-ID'), req.get('CHAT-ID'), function(err){
+        if(err)
+        {
+          console.log(err);
+          res.status(500);
+          res.send('Unable to deregister chat');
+        }
+        else
+        {
+          client.zscan(["users_chats_ttl", 0, "MATCH", `*,${req.get('CHAT-ID')}`], function(err, response){
+            if(!err){
+              to_remove = response[1][0];
+              client.zrem("users_chats_ttl", to_remove, function(err, response)
+                {
+                  if(err)
+                  {
+                    console.log(err);
+                  }
+                });
+            }
+          });
+          res.send('Chat deregistered');
+        }
+      });
     }
     else
     {
-      client.zscan(["users_chats_ttl", 0, "MATCH", `*,${req.get('CHAT-ID')}`], function(err, response){
-        if(!err){
-          to_remove = response[1][0];
-          client.zrem("users_chats_ttl", to_remove, function(err, response)
-            {
-              if(err)
-              {
-                console.log(err);
-              }
-            });
-        }
-      });
-      res.send('Chat deregistered');
+      res.send('No chat found');
     }
   });
 }
 
 function checkAPIKey(req, res, next)
 {
-  
+
   if (req.get('USERS-CHAT-API-KEY') == process.env.USERS_CHAT_API_KEY)
   {
     next();
