@@ -59,7 +59,7 @@ function getChats(req, res)
     }
     else
     {
-      res.send(userChats);
+      res.send(userChats.reverse());
     }
   });
 }
